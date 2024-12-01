@@ -70,7 +70,7 @@ if __name__ == '__main__':
     parser.add_argument('--font-path', type=str, help="Path to a ttf font")
 
     parser.add_argument('--output-dir', type=str, help="Dir to save the ids in case of CSV")
-    parser.add_argument('--csv', type=str, help="CSV file with template,name,profile-path")
+    parser.add_argument('--csv', type=str, help="CSV file with template,name,profile-pic-path")
 
     args = parser.parse_args()
 
@@ -79,4 +79,4 @@ if __name__ == '__main__':
     elif args.name and args.profile_pic and args.output:
         generate_id(args.template, args.name, args.profile_pic, args.output)
     else:
-        print("Error: Either provide a CSV file to --csv-file or the necessary individual arguments (--template, --name, --profile-pic, --save-as).")
+        print("Error: Either provide a CSV file to --csv-file or the necessary individual arguments (--template, --name, --profile-pic).")
