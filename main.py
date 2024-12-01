@@ -3,8 +3,8 @@ import os
 import csv
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 
-def generate_id(template_name: str, name, profile_path, save_as):
-    with Image.open(f'./templates/{template_name}.png') as template:
+def generate_id(template_path: str, name, profile_path, save_as):
+    with Image.open(template_path) as template:
         try:
             profile_image = Image.open(profile_path or './profiles/unknown.jpeg')
         except FileNotFoundError:
@@ -58,25 +58,25 @@ def process_csv(csv_file, output_dir):
         reader = csv.DictReader(file)
 
         for row in reader:
-            generate_id(row['template'], row['name'], row['profile-pic-path'] or './profiles/unknown.jpeg', f"{output_dir}/{row['name'].lower().replace(' ', '_')}.pdf")
+            generate_id(row['template'], row['name'], row['profile-pic'] or './profiles/unknown.jpeg', f"{output_dir}/{row['name'].lower().replace(' ', '_')}.pdf")
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generate ID for volunteers")
-    parser.add_argument('--template', type=str, help="Name of the template (See ./templates)")
+    parser.add_argument('--template', type=str, help="Path to the template image")
     parser.add_argument('--name', type=str, help="Profile name")
     parser.add_argument('--profile-pic', type=str, help="Path to the profile picture")
     parser.add_argument('--output', type=str, help="Path to save the id")
     parser.add_argument('--font-path', type=str, help="Path to a ttf font")
 
     parser.add_argument('--output-dir', type=str, help="Dir to save the ids in case of CSV")
-    parser.add_argument('--csv', type=str, help="CSV file with template,name,profile-pic-path")
+    parser.add_argument('--csv', type=str, help="CSV file with template,name,profile-pic")
 
     args = parser.parse_args()
 
     if args.csv:
         process_csv(args.csv, args.output_dir)
-    elif args.name and args.profile_pic and args.output:
+    elif args.template and args.name and args.profile_pic:
         generate_id(args.template, args.name, args.profile_pic, args.output)
     else:
         print("Error: Either provide a CSV file to --csv-file or the necessary individual arguments (--template, --name, --profile-pic).")
