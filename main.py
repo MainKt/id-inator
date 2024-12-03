@@ -3,7 +3,7 @@ import os
 import csv
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 
-def generate_id(template_path: str, name, profile_path, save_as):
+def generate_id(template_path: str, name: str, profile_path: str, save_as: str):
     with Image.open(template_path) as template:
         try:
             profile_image = Image.open(profile_path or './profiles/unknown.jpeg')
@@ -47,8 +47,10 @@ def generate_id(template_path: str, name, profile_path, save_as):
                 draw.text((text_x, text_y), name, font=font, fill=(255, 255, 255))
                 break
 
-        template.save(save_as or f'{name.lower().replace(' ', '_')}.pdf')
-
+        back_cover = 'HeadBackTemplate.png' if 'head' in template_path.lower() else 'VolunteerBackTemplate.png'
+        back_cover = Image.open(f'./templates/{back_cover}')
+        pdf_path = save_as or f'{name.lower().replace(' ', '_')}.pdf'
+        template.save(pdf_path, save_all=True, append_images=[back_cover])
 
 def process_csv(csv_file, output_dir):
     if not output_dir: output_dir = 'ids'
