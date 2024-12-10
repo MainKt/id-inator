@@ -1,4 +1,5 @@
 import argparse
+import re
 import os
 import csv
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
@@ -63,6 +64,11 @@ def process_csv(csv_file, output_dir):
             generate_id(row['template'], row['name'], row['profile-pic'] or './profiles/unknown.jpeg', f"{output_dir}/{row['name'].lower().replace(' ', '_')}.pdf")
 
 
+def to_title_case(image_name):
+    full_name = os.path.splitext(image_name)[0].replace('_', ' ').split(' ')
+    capitalize = lambda name: "'".join(map(str.capitalize, re.split(r"[\'\’]", name)))
+    return ' '.join(map(capitalize, full_name))
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generate ID for volunteers")
     parser.add_argument('--template', type=str, help="Path to the template image")
@@ -73,12 +79,20 @@ if __name__ == '__main__':
 
     parser.add_argument('--output-dir', type=str, help="Dir to save the ids in case of CSV")
     parser.add_argument('--csv', type=str, help="CSV file with template,name,profile-pic")
+    parser.add_argument('--directory', type=str, help="Directory with picture names as the person's name")
 
     args = parser.parse_args()
 
-    if args.csv:
+    if args.csv and args.output_dir:
         process_csv(args.csv, args.output_dir)
+    elif args.template and args.directory and args.output_dir:
+        os.makedirs(args.output_dir, exist_ok=True)
+        images = os.listdir(args.directory)
+        for image in images:
+            name = to_title_case(image)
+            print(name)
+            generate_id(args.template, name, os.path.join(args.directory, image), os.path.join(args.output_dir, os.path.splitext(image)[0] + '.pdf'))
     elif args.template and args.name and args.profile_pic:
         generate_id(args.template, args.name, args.profile_pic, args.output)
     else:
-        print("Error: Either provide a CSV file to --csv-file or the necessary individual arguments (--template, --name, --profile-pic).")
+        print("Error: Either provide a CSV file to --csv-file or the necessary individual arguments (--template, --name, --profile-pic) or (--template, --directory).")
