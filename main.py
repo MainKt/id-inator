@@ -9,13 +9,13 @@ def generate_id(template_path: str, name: str, profile_path: str, save_as: str):
         try:
             profile_image = Image.open(profile_path or './profiles/unknown.jpeg')
         except FileNotFoundError:
-            print(f"Error: The file at {profile_path} was not found.")
-            return
+            print(profile_path, ' NOT FOUND')
+            profile_image = Image.open('./profiles/unknown.jpeg')
         except UnidentifiedImageError:
             print(f"Error: The file at {profile_path} is not a valid image.")
             return
 
-        side = min(template.width, template.height) // 2
+        side = int(min(template.width, template.height) / 2.5) 
         profile_image = profile_image.resize((side, side))
 
         mask = Image.new("L", (side, side))
@@ -26,14 +26,14 @@ def generate_id(template_path: str, name: str, profile_path: str, save_as: str):
 
         offset = template.width - side
         x = offset // 2
-        y = 3 * offset // 4
+        y = 3 * offset // 4 - 10
 
         template.paste(profile_image, (x, y), profile_image)
 
         draw = ImageDraw.Draw(template)
-        font_path = "./fonts/Helvetica-Bold.ttf"
+        font_path = "./fonts/Fontspring-DEMO-theseasons-bd.otf"
 
-        max_font_size = 200
+        max_font_size = 100
         for font_size in range(max_font_size, 10, -5):
             font = ImageFont.truetype(font_path, font_size)
             text_width = font.getlength(name)
@@ -61,20 +61,20 @@ def process_id_csv(csv_file, output_dir):
         reader = csv.DictReader(file)
 
         for row in reader:
-            generate_id(row['template'], row['name'], row['profile-pic'] or './profiles/unknown.jpeg', f"{output_dir}/{row['name'].lower().replace(' ', '_')}.pdf")
+            generate_id(row['template'], row['name'], row['profile_pic'] or './profiles/unknown.jpeg', f"{output_dir}/{row['name'].lower().replace(' ', '_')}.pdf")
 
 def generate_cert(template_path: str, name: str, save_as: str):
     with Image.open(template_path) as template:
         draw = ImageDraw.Draw(template)
         font_path = "./fonts/Helvetica-Bold.ttf"
 
-        max_font_size = 80
+        max_font_size = 50
         for font_size in range(max_font_size, 10, -5):
             font = ImageFont.truetype(font_path, font_size)
             text_width = font.getlength(name)
             
             if text_width <= (template.width * 0.7):
-                text_x = 100
+                text_x = (template.width - text_width) / 2
 
                 bbox = font.getbbox(name)
                 text_height = bbox[3] + bbox[1]
